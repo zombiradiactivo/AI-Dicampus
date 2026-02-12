@@ -14,13 +14,19 @@ def realizar_operacion(operacion):
         elif operacion == "multiplicar":
             resultado = num1 * num2
         elif operacion == "dividir":
+            if num1 == 0:
+                messagebox.showerror("Error", "No se puede dividir por cero.")
+                raise ZeroDivisionError("Error: No se puede dividir por cero.")
+            if num2 == 0:
+                messagebox.showerror("Error", "No se puede dividir por cero.")
+                raise ZeroDivisionError("Error: No se puede dividir por cero.")
             resultado = num1 / num2
         
         # Actualizamos la etiqueta del resultado
         label_resultado.config(text=f"Resultado: {resultado}", fg="black")
     except ValueError:
-        # Error si el usuario no ingresa números válidos
-        messagebox.showerror("Error", "Por favor, ingresa solo números.")
+            # Error si el usuario no ingresa números válidos
+            messagebox.showerror("Error", "Por favor, ingresa solo números.")
 
 # Configuración de la ventana principal
 ventana = tk.Tk()

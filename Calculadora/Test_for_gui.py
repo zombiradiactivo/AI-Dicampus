@@ -36,8 +36,14 @@ class TestCalculadoraGUI(unittest.TestCase):
     def test_division_por_cero_gui(self):
         entry_1.insert(0, "10")
         entry_2.insert(0, "0")
-        # En tu código actual, esto lanzará ZeroDivisionError
-        # porque no lo validaste dentro de realizar_operacion
+        
+        # Ahora coinciden: el código lanza ZeroDivisionError y el test busca ZeroDivisionError
+        with self.assertRaises(ZeroDivisionError):
+            realizar_operacion("dividir")
+
+    def test_division_numerador_cero(self):
+        entry_1.insert(0, "0")
+        entry_2.insert(0, "5")
         with self.assertRaises(ZeroDivisionError):
             realizar_operacion("dividir")
 
