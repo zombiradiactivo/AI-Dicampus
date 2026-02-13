@@ -1,6 +1,6 @@
 import unittest
 import tkinter as tk
-from calc_gui import realizar_operacion, entry_1, entry_2, label_resultado
+from app_gui import realizar_operacion, entry_1, entry_2, label_resultado
 
 class TestCalculadoraGUI(unittest.TestCase):
 
