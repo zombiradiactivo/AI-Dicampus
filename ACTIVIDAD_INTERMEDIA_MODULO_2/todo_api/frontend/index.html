@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Mis Tareas</h1>
+        
+        <!-- Formulario para nueva tarea -->
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="¿Qué necesitas hacer hoy?">
+            <button onclick="createTask()">Agregar</button>
+        </div>
+
+        <!-- Lista de tareas -->
+        <ul id="taskList">
+            <!-- Aquí se inyectarán las tareas con JS -->
+        </ul>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
