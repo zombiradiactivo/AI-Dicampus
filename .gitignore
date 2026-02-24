@@ -8,3 +8,5 @@ AI.code-workspace
 __pycache__/
 *.pyc
 .env
+/.vs
+*.db

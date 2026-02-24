@@ -1,0 +1,18 @@
+# Web Framework
+fastapi==0.110.0
+uvicorn==0.27.1
+
+# Validación y Configuración
+pydantic==2.6.3
+pydantic-settings==2.2.1
+email-validator==2.1.1
+
+# Base de Datos
+sqlalchemy==2.0.28
+
+# Seguridad y Autenticación
+# Nota: bcrypt 4.0.1 es necesaria para compatibilidad con passlib en Python moderno
+bcrypt==4.0.1
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.9
