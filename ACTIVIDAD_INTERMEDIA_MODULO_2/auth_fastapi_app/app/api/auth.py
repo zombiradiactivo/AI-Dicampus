@@ -1,14 +1,20 @@
+from fastapi import Request
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import cast # Importa cast para ayudar al linter
-from app.crud import user as user_crud
-from app.schemas import user as user_schemas
+
 from app.core import security
 from app.database import SessionLocal
-from jose import JWTError, jwt
+from app.crud import user as user_crud
+from app.crud import audit as audit_crud
+from app.models import user as user_models
+from app.schemas import user as user_schemas
 from app.models.user import User as UserModel
+from app.schemas import audit as audit_schemas
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -35,39 +41,49 @@ def register_user(user: user_schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=user_schemas.Token)
 def login_for_access_token(
+    request: Request, # <--- Inyectamos el request para la IP
     form_data: OAuth2PasswordRequestForm = Depends(), 
-    db: Session = Depends(get_db)
-):
+    db: Session = Depends(get_db)):
+
+    # 1. Verificar si hay demasiados fallos previos (Seguridad)
+    recent_failures = audit_crud.count_recent_failures(db, email=form_data.username)
+    if recent_failures >= 5:
+        raise HTTPException(
+            status_code=429, 
+            detail="Cuenta bloqueada temporalmente por demasiados intentos fallidos."
+        )
+
     user = user_crud.get_user_by_email(db, email=form_data.username)
+    ip = request.client.host if request.client else "unknown"
     
-    # 1. Verificamos si el usuario existe primero
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email o contraseña incorrectos"
-        )
+    success = False
+    user_id_val: int | None = None # Usamos un nombre distinto para evitar confusiones   
 
-    # 2. Usamos 'cast' para decirle al linter: "Confía en mí, esto es un str"
-    # O simplemente extraemos el valor si el linter sigue protestando
-    is_password_correct = security.verify_password(
-        form_data.password, 
-        cast(str, user.hashed_password) 
-    )
+    # 1. Verificamos usuario y contraseña
+    if user and security.verify_password(form_data.password, cast(str, user.hashed_password)):
+        success = True
+        user_id_val = cast(int, user.id) # 'cast' le dice al linter que esto es un int
 
-    if not is_password_correct:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email o contraseña incorrectos",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # 3. REGISTRAR EN AUDITORÍA
+    audit_crud.create_login_log(db, audit_schemas.LoginLogCreate(
+        email=form_data.username,
+        ip_address=ip,
+        success=success,
+        user_id=user_id_val
+    ))
+
+    if not success or not user: # Añadimos 'not user' para que el linter sepa que no es None abajo
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
     
-    # 3. Generar el Token
+# 3. Generar Token
+    # Ahora el linter sabe que 'user' no es None gracias al if anterior
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        subject=user.email, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+        subject=cast(str, user.email), 
+        expires_delta=access_token_expires    )
     
+    return {"access_token": access_token, "token_type": "bearer"}
+
 # 1. Función para obtener el usuario actual desde el Token
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(security.oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -98,3 +114,13 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(securit
 @router.get("/me", response_model=user_schemas.User)
 def read_users_me(current_user: UserModel = Depends(get_current_user)):
     return current_user
+
+@router.get("/logs/{email}", response_model=list[audit_schemas.LoginLog])
+def read_login_history(
+    email: str, 
+    db: Session = Depends(get_db),
+    current_user: user_models.User = Depends(get_current_user) # Protegido
+):
+    """Devuelve el historial de accesos de un email."""
+    # Podrías añadir lógica aquí para que un usuario solo vea sus propios logs
+    return audit_crud.get_user_login_history(db, email=email)
