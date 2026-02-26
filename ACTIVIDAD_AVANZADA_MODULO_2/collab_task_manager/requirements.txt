@@ -1,0 +1,5 @@
+# Dependencia para el manejo de JSON Web Tokens
+PyJWT==2.10.1
+
+# Opcional: Para el chequeo de tipos estático durante desarrollo
+# mypy==1.14.1

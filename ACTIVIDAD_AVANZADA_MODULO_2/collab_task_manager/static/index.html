@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager Colaborativo</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="auth-section">
+        <h2>Acceso al Sistema</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="handleAuth('login')">Entrar</button>
+        <button onclick="handleAuth('register')" style="background: #28a745; margin-top: 5px;">Registrarse</button>
+    </div>
+
+    <div id="app-section" style="display:none;">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Mis Tareas</h2>
+            <button onclick="logout()" style="width: auto; padding: 5px 10px; background: #dc3545;">Cerrar Sesión</button>
+        </header>
+        
+        <hr>
+        
+        <div class="task-controls">
+            <h4>Nueva Tarea</h4>
+            <input type="text" id="task-title" placeholder="Título de la tarea">
+            <textarea id="task-desc" placeholder="Descripción (opcional)" style="width: 100%; margin-bottom: 10px;"></textarea>
+            
+            <label for="task-priority">Prioridad:</label>
+            <select id="task-priority" style="margin-bottom: 10px; padding: 5px;">
+                <option value="1">Baja (Verde)</option>
+                <option value="2">Media (Amarillo)</option>
+                <option value="3">Alta (Rojo)</option>
+            </select>
+            
+            <button onclick="createNewTask()">+ Añadir Tarea</button>
+        </div>
+
+        <ul id="task-list" style="margin-top: 20px;"></ul>
+            </ul>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

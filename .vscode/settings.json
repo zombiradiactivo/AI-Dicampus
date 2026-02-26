@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
         "./Calculadora/src"
-    ]
+    ],
+    "codeQL.githubDatabase.download": "never"
 }
