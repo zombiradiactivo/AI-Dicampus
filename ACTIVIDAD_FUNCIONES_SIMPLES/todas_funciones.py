@@ -1,3 +1,5 @@
+### Todos los archivos separados estan aqui https://github.com/zombiradiactivo/AI-Dicampus/tree/main/ACTIVIDAD_FUNCIONES_SIMPLES
+
 def es_positivo (numero):
     return numero > 0
 
